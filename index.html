@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AccountaBuddy – Find Your Accountability Partner</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Plus Jakarta Sans',sans-serif;background:#070710;color:#fff;min-height:100vh;overflow-x:hidden}
+  :root{--green:#00e5a0;--dark:#070710;--card:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08)}
+  .blob{position:fixed;border-radius:50%;filter:blur(120px);opacity:0.07;pointer-events:none;z-index:0}
+  nav{display:flex;justify-content:space-between;align-items:center;padding:18px 32px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(7,7,16,0.92);backdrop-filter:blur(20px);z-index:100}
+  .logo{font-weight:800;font-size:1.3rem;letter-spacing:-0.5px}
+  .logo span{color:var(--green)}
+  .btn-green{background:linear-gradient(135deg,#00e5a0,#00c9b8);border:none;color:#070710;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;border-radius:12px;transition:all 0.2s;font-size:0.95rem;padding:10px 22px}
+  .btn-green:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,229,160,0.35)}
+  .btn-ghost{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;border-radius:12px;transition:all 0.2s;font-weight:600;font-size:0.95rem;padding:10px 22px}
+  .btn-ghost:hover{background:rgba(255,255,255,0.12)}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:20px}
+  input,textarea{width:100%;padding:14px 18px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:#fff;font-size:1rem;font-family:'Plus Jakarta Sans',sans-serif;outline:none;box-sizing:border-box}
+  input::placeholder,textarea::placeholder{color:rgba(255,255,255,0.3)}
+  .screen{display:none;position:relative;z-index:1}
+  .screen.active{display:block}
+  .nav-btn{background:none;border:none;color:rgba(255,255,255,0.5);font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:0.88rem;cursor:pointer;padding:9px 16px;border-radius:10px;transition:all 0.2s}
+  .nav-btn:hover,.nav-btn.active{background:rgba(0,229,160,0.1);color:var(--green)}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+  .fade1{animation:fadeUp 0.6s ease 0.1s both}
+  .fade2{animation:fadeUp 0.6s ease 0.25s both}
+  .fade3{animation:fadeUp 0.6s ease 0.4s both}
+  .fade4{animation:fadeUp 0.6s ease 0.55s both}
+
+  /* LANDING */
+  .hero{text-align:center;padding:90px 24px 60px;max-width:780px;margin:0 auto}
+  .badge{display:inline-block;background:rgba(0,229,160,0.1);border:1px solid rgba(0,229,160,0.25);border-radius:100px;padding:6px 20px;font-size:0.82rem;color:var(--green);margin-bottom:28px;letter-spacing:0.5px}
+  h1{font-size:clamp(2.6rem,6vw,4.8rem);font-weight:800;line-height:1.08;letter-spacing:-2px;margin-bottom:22px}
+  h1 span{color:var(--green)}
+  .hero p{font-size:1.1rem;color:rgba(255,255,255,0.45);max-width:500px;margin:0 auto 44px;line-height:1.75;font-weight:300}
+  .hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;max-width:860px;margin:0 auto;padding:0 24px 60px}
+  .how-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:26px;transition:all 0.2s}
+  .how-card:hover{border-color:rgba(0,229,160,0.3);transform:translateY(-3px)}
+  .how-num{color:var(--green);font-size:0.75rem;letter-spacing:1px;margin-bottom:12px;font-weight:700}
+  .how-title{font-weight:700;font-size:1rem;margin-bottom:10px}
+  .how-desc{color:rgba(255,255,255,0.4);font-size:0.88rem;line-height:1.65}
+  .stats{display:flex;gap:16px;justify-content:center;padding:0 24px 70px;flex-wrap:wrap}
+  .stat{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px 36px;text-align:center}
+  .stat-val{font-size:1.9rem;font-weight:800;color:var(--green)}
+  .stat-label{color:rgba(255,255,255,0.35);font-size:0.85rem;margin-top:4px}
+  .bottom-cta{text-align:center;padding:50px 24px 60px;border-top:1px solid rgba(255,255,255,0.05);background:rgba(0,229,160,0.04)}
+
+  /* ONBOARD */
+  .onboard-wrap{max-width:560px;margin:0 auto;padding:48px 24px}
+  .step-badge{background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.2);border-radius:100px;padding:6px 18px;display:inline-block;font-size:0.8rem;color:var(--green);margin-bottom:32px;letter-spacing:0.5px}
+  .goals-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:32px}
+  .goal-opt{padding:18px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;cursor:pointer;transition:all 0.2s}
+  .goal-opt:hover{border-color:var(--green);transform:translateY(-2px)}
+  .goal-opt.selected{background:rgba(0,229,160,0.12);border-color:var(--green)}
+  .goal-emoji{font-size:1.5rem;margin-bottom:6px}
+  .goal-name{font-weight:700;font-size:0.95rem}
+  .goal-desc{color:rgba(255,255,255,0.35);font-size:0.78rem;margin-top:3px}
+
+  /* FIND */
+  .find-wrap{max-width:960px;margin:0 auto;padding:36px 24px}
+  .filters{display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap}
+  .filter-btn{padding:8px 18px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:0.85rem;transition:all 0.2s}
+  .filter-btn:hover,.filter-btn.active{background:rgba(0,229,160,0.12);color:var(--green);border-color:var(--green)}
+  .partners-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+  .partner-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:22px;transition:all 0.2s}
+  .partner-card:hover{border-color:rgba(0,229,160,0.3);transform:translateY(-3px)}
+  .av{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#070710;font-size:0.88rem;position:relative;flex-shrink:0}
+  .online-dot{position:absolute;bottom:1px;right:1px;width:11px;height:11px;border-radius:50%;background:var(--green);border:2px solid #070710}
+  .partner-bio{background:rgba(255,255,255,0.03);border-radius:10px;padding:10px 12px;font-size:0.84rem;color:rgba(255,255,255,0.5);margin-bottom:16px;line-height:1.55}
+  .goal-tag{background:rgba(0,229,160,0.1);border:1px solid rgba(0,229,160,0.2);border-radius:6px;padding:3px 10px;font-size:0.75rem;color:var(--green);font-weight:600;display:inline-block;margin-bottom:14px}
+
+  /* DASHBOARD */
+  .dash-wrap{max-width:880px;margin:0 auto;padding:32px 24px}
+  .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+  .week-row{display:flex;gap:10px}
+  .week-day{flex:1;text-align:center}
+  .week-box{aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:6px;font-weight:800;font-size:0.9rem}
+  .week-label{color:rgba(255,255,255,0.3);font-size:0.72rem}
+  .section-label{font-size:0.72rem;color:rgba(255,255,255,0.3);letter-spacing:1.5px;margin-bottom:16px;text-transform:uppercase}
+
+  /* MESSAGES */
+  .msg-wrap{max-width:680px;margin:0 auto;padding:28px 24px;display:flex;flex-direction:column;min-height:calc(100vh - 70px)}
+  .msg-list{flex:1;display:flex;flex-direction:column;gap:10px;margin-bottom:16px;min-height:300px;overflow-y:auto}
+  .msg-bubble{max-width:72%;padding:11px 16px;font-size:0.92rem;line-height:1.5}
+  .msg-bubble.me{background:linear-gradient(135deg,#00e5a0,#00c9b8);color:#070710;font-weight:600;border-radius:18px 18px 4px 18px;align-self:flex-end}
+  .msg-bubble.them{background:rgba(255,255,255,0.08);color:#fff;border-radius:18px 18px 18px 4px;align-self:flex-start}
+  .msg-time{font-size:0.68rem;margin-top:4px;opacity:0.55}
+  .msg-input-row{display:flex;gap:10px}
+
+  /* PREMIUM MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:200;padding:24px}
+  .modal-box{background:#12121e;border:1px solid rgba(247,151,30,0.3);border-radius:24px;padding:40px;max-width:420px;width:100%;text-align:center}
+  .prem-feature{display:flex;align-items:center;gap:12px;margin-bottom:14px;text-align:left}
+  .prem-check{width:26px;height:26px;border-radius:50%;background:rgba(247,151,30,0.15);border:1px solid rgba(247,151,30,0.3);display:flex;align-items:center;justify-content:center;font-size:0.75rem;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<div class="blob" style="width:600px;height:600px;background:#00e5a0;top:-200px;right:-200px"></div>
+<div class="blob" style="width:500px;height:500px;background:#6c63ff;bottom:-100px;left:-100px"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Accounta<span>Buddy</span></div>
+  <div id="nav-links" style="display:flex;gap:4px"></div>
+  <div id="nav-right"></div>
+</nav>
+
+<!-- LANDING -->
+<div id="screen-landing" class="screen active">
+  <div class="hero">
+    <div class="badge fade1">🔥 2,400+ people holding each other accountable right now</div>
+    <h1 class="fade2">Stop quitting.<br><span>Find your person.</span></h1>
+    <p class="fade3">Match with a stranger who shares your goal. Check in with each other every day. Build streaks. Actually follow through — together.</p>
+    <div class="hero-btns fade4">
+      <button class="btn-green" onclick="goTo('onboard')" style="padding:17px 44px;font-size:1.05rem;border-radius:14px">Find My Accountability Partner →</button>
+      <button class="btn-ghost" onclick="goTo('find')" style="padding:17px 32px;font-size:1rem">See Who's Looking</button>
+    </div>
+  </div>
+  <p style="text-align:center;color:rgba(255,255,255,0.2);font-size:0.78rem;letter-spacing:2px;margin-bottom:28px;text-transform:uppercase">How it works — 3 simple steps</p>
+  <div class="how-grid">
+    <div class="how-card"><div class="how-num">01</div><div class="how-title">Pick your goal 🎯</div><div class="how-desc">Choose what you're working on — fitness, coding, business, studying, or habits.</div></div>
+    <div class="how-card"><div class="how-num">02</div><div class="how-title">Get matched instantly ⚡</div><div class="how-desc">We show you real people with the same goal. Pick one and partner up — no signup needed.</div></div>
+    <div class="how-card"><div class="how-num">03</div><div class="how-title">Check in every day 🔥</div><div class="how-desc">A simple yes or no each day. Did you do it? Your partner sees. No hiding. Build your streak.</div></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-val">2,400+</div><div class="stat-label">Active pairs</div></div>
+    <div class="stat"><div class="stat-val">87%</div><div class="stat-label">Completion rate</div></div>
+    <div class="stat"><div class="stat-val">41 days</div><div class="stat-label">Avg streak</div></div>
+    <div class="stat"><div class="stat-val">Free</div><div class="stat-label">Always free</div></div>
+  </div>
+  <div class="bottom-cta">
+    <h2 style="font-size:1.9rem;font-weight:800;letter-spacing:-1px;margin-bottom:12px">Your goals won't wait.</h2>
+    <p style="color:rgba(255,255,255,0.35);margin-bottom:28px;font-size:0.95rem">Join thousands of people holding each other accountable every single day.</p>
+    <button class="btn-green" onclick="goTo('onboard')" style="padding:15px 44px;font-size:1rem;border-radius:14px">Start Free — Takes 30 seconds →</button>
+  </div>
+</div>
+
+<!-- ONBOARD -->
+<div id="screen-onboard" class="screen">
+  <div class="onboard-wrap">
+    <div class="step-badge" id="step-badge">Step 1 of 2</div>
+    <div id="step1">
+      <h2 style="font-size:2rem;font-weight:800;letter-spacing:-1px;margin-bottom:6px">What's your name?</h2>
+      <p style="color:rgba(255,255,255,0.4);margin-bottom:24px;font-weight:300">Your accountability partner will see this</p>
+      <input type="text" id="user-name" placeholder="Your first name..." style="margin-bottom:32px">
+      <h2 style="font-size:2rem;font-weight:800;letter-spacing:-1px;margin-bottom:6px">What's your goal?</h2>
+      <p style="color:rgba(255,255,255,0.4);margin-bottom:24px;font-weight:300">We'll match you with someone working on the same thing</p>
+      <div class="goals-grid">
+        <div class="goal-opt" onclick="selectGoal('fitness',this)"><div class="goal-emoji">💪</div><div class="goal-name">Fitness</div><div class="goal-desc">Gym, running, weight loss</div></div>
+        <div class="goal-opt" onclick="selectGoal('coding',this)"><div class="goal-emoji">💻</div><div class="goal-name">Coding</div><div class="goal-desc">Learning to build things</div></div>
+        <div class="goal-opt" onclick="selectGoal('business',this)"><div class="goal-emoji">🚀</div><div class="goal-name">Business</div><div class="goal-desc">Starting or growing something</div></div>
+        <div class="goal-opt" onclick="selectGoal('studying',this)"><div class="goal-emoji">📚</div><div class="goal-name">Studying</div><div class="goal-desc">Exams, courses, certs</div></div>
+        <div class="goal-opt" onclick="selectGoal('habits',this)"><div class="goal-emoji">🌱</div><div class="goal-name">Habits</div><div class="goal-desc">Quit something or build routines</div></div>
+        <div class="goal-opt" onclick="selectGoal('writing',this)"><div class="goal-emoji">✍️</div><div class="goal-name">Writing</div><div class="goal-desc">Books, blogs, scripts</div></div>
+      </div>
+      <button class="btn-green" onclick="goStep2()" style="width:100%;padding:16px;font-size:1rem;border-radius:14px">Continue →</button>
+    </div>
+    <div id="step2" style="display:none">
+      <h2 style="font-size:2rem;font-weight:800;letter-spacing:-1px;margin-bottom:6px">Almost there! 🎉</h2>
+      <p style="color:rgba(255,255,255,0.4);margin-bottom:24px;font-weight:300">Tell your future partner what you're working on</p>
+      <textarea id="user-bio" rows="4" placeholder="e.g. I'm trying to go to the gym 4x a week. I need someone to check on me daily..." style="margin-bottom:28px;resize:none"></textarea>
+      <button class="btn-green" onclick="finishOnboard()" style="width:100%;padding:16px;font-size:1rem;border-radius:14px">Show Me My Matches →</button>
+      <button class="btn-ghost" onclick="backStep1()" style="width:100%;padding:14px;margin-top:12px;font-size:0.95rem">← Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- FIND PARTNERS -->
+<div id="screen-find" class="screen">
+  <div class="find-wrap">
+    <h1 style="font-size:2rem;font-weight:800;letter-spacing:-0.5px;margin-bottom:6px">Find a Partner</h1>
+    <p style="color:rgba(255,255,255,0.4);margin-bottom:28px;font-weight:300">Real people looking for accountability right now 👇</p>
+    <div class="filters" id="filters">
+      <button class="filter-btn active" onclick="filterPartners('all',this)">All Goals</button>
+      <button class="filter-btn" onclick="filterPartners('fitness',this)">💪 Fitness</button>
+      <button class="filter-btn" onclick="filterPartners('coding',this)">💻 Coding</button>
+      <button class="filter-btn" onclick="filterPartners('business',this)">🚀 Business</button>
+      <button class="filter-btn" onclick="filterPartners('studying',this)">📚 Studying</button>
+      <button class="filter-btn" onclick="filterPartners('habits',this)">🌱 Habits</button>
+      <button class="filter-btn" onclick="filterPartners('writing',this)">✍️ Writing</button>
+    </div>
+    <div class="partners-grid" id="partners-grid"></div>
+    <div id="join-cta" style="text-align:center;margin-top:48px;padding:36px;background:var(--card);border:1px solid rgba(0,229,160,0.2);border-radius:20px;display:none">
+      <div style="font-size:1.5rem;margin-bottom:10px">👋</div>
+      <h3 style="font-weight:800;margin-bottom:8px">Want someone to partner with you?</h3>
+      <p style="color:rgba(255,255,255,0.4);margin-bottom:20px;font-size:0.9rem">Create your profile in 30 seconds — no email or password needed!</p>
+      <button class="btn-green" onclick="goTo('onboard')" style="padding:13px 36px;font-size:0.95rem">Create My Profile →</button>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="screen-dashboard" class="screen">
+  <div class="dash-wrap">
+    <h1 style="font-size:1.7rem;font-weight:800;letter-spacing:-0.5px;margin-bottom:4px" id="dash-greeting">Hey there 👋</h1>
+    <p style="color:rgba(255,255,255,0.4);margin-bottom:28px;font-weight:300">Your partner is waiting for your check-in today.</p>
+    <div class="dash-grid">
+      <div class="card" style="padding:26px">
+        <div class="section-label">Your Partner</div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+          <div class="av" id="partner-av" style="background:linear-gradient(135deg,#6c63ff,#00b8d4)">AK<div class="online-dot"></div></div>
+          <div>
+            <div style="font-weight:700" id="partner-name">Amara K.</div>
+            <div style="color:rgba(255,255,255,0.4);font-size:0.8rem" id="partner-loc">🇬🇭 · Online now</div>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border-radius:10px;padding:10px 14px;font-size:0.84rem;color:rgba(255,255,255,0.5);margin-bottom:18px;line-height:1.55" id="partner-bio-text">"Building my first SaaS. Need someone to hold me accountable daily!"</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><div style="font-size:1.9rem;font-weight:800;color:var(--green)" id="partner-streak">14</div><div style="color:rgba(255,255,255,0.35);font-size:0.75rem">day streak 🔥</div></div>
+          <button class="btn-green" onclick="goTo('message')" style="padding:10px 20px;font-size:0.88rem">Message →</button>
+        </div>
+      </div>
+      <div class="card" style="padding:26px">
+        <div class="section-label">Today's Check-In</div>
+        <p style="font-weight:700;font-size:1.1rem;margin-bottom:6px">Did you work on your goal today?</p>
+        <p style="color:rgba(255,255,255,0.35);font-size:0.85rem;margin-bottom:28px;line-height:1.6;font-weight:300">Your partner gets notified the moment you check in!</p>
+        <div id="checkin-btns">
+          <button class="btn-green" onclick="checkIn('yes')" style="width:100%;padding:15px;font-size:1rem;border-radius:12px;margin-bottom:10px">✅ Yes! I did it today!</button>
+          <button onclick="checkIn('no')" style="width:100%;padding:15px;background:rgba(255,100,100,0.08);border:1px solid rgba(255,100,100,0.2);color:#ff7070;border-radius:12px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1rem;transition:all 0.2s">❌ Not today</button>
+        </div>
+        <div id="checkin-done" style="display:none;text-align:center;padding:24px 16px;border-radius:14px"></div>
+      </div>
+    </div>
+    <div class="card" style="padding:26px">
+      <div class="section-label">This Week</div>
+      <div class="week-row">
+        <div class="week-day"><div class="week-box" style="background:linear-gradient(135deg,#00e5a0,#00c9b8);color:#070710">✓</div><div class="week-label">Mon</div></div>
+        <div class="week-day"><div class="week-box" style="background:linear-gradient(135deg,#00e5a0,#00c9b8);color:#070710">✓</div><div class="week-label">Tue</div></div>
+        <div class="week-day"><div class="week-box" style="background:linear-gradient(135deg,#00e5a0,#00c9b8);color:#070710">✓</div><div class="week-label">Wed</div></div>
+        <div class="week-day"><div class="week-box" style="background:rgba(255,100,100,0.15);border:1px solid rgba(255,100,100,0.2);color:#ff7070">✗</div><div class="week-label">Thu</div></div>
+        <div class="week-day"><div class="week-box" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.06)"></div><div class="week-label">Fri</div></div>
+        <div class="week-day"><div class="week-box" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.06)"></div><div class="week-label">Sat</div></div>
+        <div class="week-day"><div class="week-box" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.06)"></div><div class="week-label">Sun</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MESSAGES -->
+<div id="screen-message" class="screen">
+  <div class="msg-wrap">
+    <div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:24px;padding:14px 18px">
+      <div class="av" style="background:linear-gradient(135deg,#6c63ff,#00b8d4)" id="msg-av">AK<div class="online-dot"></div></div>
+      <div><div style="font-weight:700" id="msg-partner-name">Amara K.</div><div style="color:var(--green);font-size:0.78rem">● Online now</div></div>
+    </div>
+    <div class="msg-list" id="msg-list">
+      <div style="display:flex;justify-content:flex-start"><div class="msg-bubble them">Hey! Did you get your workout in today? 💪<div class="msg-time">9:02 AM</div></div></div>
+      <div style="display:flex;justify-content:flex-end"><div class="msg-bubble me">Not yet, heading to the gym in 30mins!<div class="msg-time">9:15 AM</div></div></div>
+      <div style="display:flex;justify-content:flex-start"><div class="msg-bubble them">Let's go! I just finished mine. 3rd day in a row 🔥<div class="msg-time">9:16 AM</div></div></div>
+    </div>
+    <div class="msg-input-row">
+      <input type="text" id="msg-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMsg()">
+      <button class="btn-green" onclick="sendMsg()" style="padding:14px 22px;font-size:1.1rem;border-radius:12px;flex-shrink:0">→</button>
+    </div>
+  </div>
+</div>
+
+<!-- PREMIUM MODAL -->
+<div class="modal-overlay" id="premium-modal" style="display:none" onclick="if(event.target===this)closePremium()">
+  <div class="modal-box">
+    <div style="font-size:2.5rem;margin-bottom:12px">⭐</div>
+    <h2 style="font-weight:800;font-size:1.7rem;letter-spacing:-0.5px;margin-bottom:6px">Go Premium</h2>
+    <p style="color:rgba(255,255,255,0.4);margin-bottom:28px;font-size:0.9rem">Unlock the full AccountaBuddy experience</p>
+    <div class="prem-feature"><div class="prem-check">✓</div><div><div style="font-weight:600;font-size:0.9rem">2 accountability partners</div><div style="color:rgba(255,255,255,0.3);font-size:0.78rem">Double your support network</div></div></div>
+    <div class="prem-feature"><div class="prem-check">✓</div><div><div style="font-weight:600;font-size:0.9rem">Partner history</div><div style="color:rgba(255,255,255,0.3);font-size:0.78rem">See all past partners</div></div></div>
+    <div class="prem-feature"><div class="prem-check">✓</div><div><div style="font-weight:600;font-size:0.9rem">Ad-free experience</div><div style="color:rgba(255,255,255,0.3);font-size:0.78rem">Pure focus, no distractions</div></div></div>
+    <div class="prem-feature"><div class="prem-check">✓</div><div><div style="font-weight:600;font-size:0.9rem">Priority matching</div><div style="color:rgba(255,255,255,0.3);font-size:0.78rem">Get matched within minutes</div></div></div>
+    <button style="width:100%;padding:15px;background:linear-gradient(135deg,#f7971e,#ffd200);border:none;color:#070710;font-weight:800;border-radius:14px;font-size:1rem;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;margin-top:20px;margin-bottom:10px">Upgrade — $5/month</button>
+    <button onclick="closePremium()" style="background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">Maybe later</button>
+  </div>
+</div>
+
+<script>
+const PARTNERS = [
+  {id:1,name:"Amara K.",flag:"🇬🇭",goal:"coding",streak:14,bio:"Building my first SaaS. Need someone to hold me accountable daily!",av:"AK",online:true,color:"linear-gradient(135deg,#00e5a0,#070710)"},
+  {id:2,name:"James T.",flag:"🇬🇧",goal:"fitness",streak:31,bio:"Training for a half marathon. Let's crush our goals together.",av:"JT",online:true,color:"linear-gradient(135deg,#6c63ff,#00b8d4)"},
+  {id:3,name:"Sofia R.",flag:"🇧🇷",goal:"studying",streak:7,bio:"IELTS prep. Studying 2hrs daily. Looking for a serious partner.",av:"SR",online:false,color:"linear-gradient(135deg,#ff6b6b,#ffd200)"},
+  {id:4,name:"David M.",flag:"🇿🇦",goal:"business",streak:22,bio:"Building a dropshipping store. Daily check-ins only.",av:"DM",online:true,color:"linear-gradient(135deg,#f7971e,#ff6b6b)"},
+  {id:5,name:"Priya S.",flag:"🇮🇳",goal:"habits",streak:5,bio:"Quitting social media scrolling. Need a real accountability buddy.",av:"PS",online:false,color:"linear-gradient(135deg,#00b8d4,#6c63ff)"},
+  {id:6,name:"Lucas F.",flag:"🇫🇷",goal:"writing",streak:19,bio:"Writing my first novel. 500 words a day. Let's go.",av:"LF",online:true,color:"linear-gradient(135deg,#ffd200,#00e5a0)"},
+];
+const GOALS = {fitness:"💪 Fitness",coding:"💻 Coding",business:"🚀 Business",studying:"📚 Studying",habits:"🌱 Habits",writing:"✍️ Writing"};
+
+let currentScreen = "landing";
+let selectedGoal = null;
+let userName = "";
+let currentPartner = PARTNERS[0];
+let currentFilter = "all";
+
+function goTo(screen) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById("screen-"+screen).classList.add("active");
+  currentScreen = screen;
+  updateNav();
+  if(screen === "find") renderPartners();
+  if(screen === "dashboard") updateDashboard();
+  window.scrollTo(0,0);
+}
+
+function updateNav() {
+  const navLinks = document.getElementById("nav-links");
+  const navRight = document.getElementById("nav-right");
+  if(currentScreen === "landing") {
+    navLinks.innerHTML = '';
+    navRight.innerHTML = `<button class="btn-ghost" onclick="goTo('find')" style="margin-right:8px">Browse Partners</button><button class="btn-green" onclick="goTo('onboard')">Get Started →</button>`;
+  } else {
+    navLinks.innerHTML = `
+      <button class="nav-btn ${currentScreen==='dashboard'?'active':''}" onclick="goTo('dashboard')">Dashboard</button>
+      <button class="nav-btn ${currentScreen==='message'?'active':''}" onclick="goTo('message')">Messages</button>
+      <button class="nav-btn ${currentScreen==='find'?'active':''}" onclick="goTo('find')">Find Partners</button>`;
+    navRight.innerHTML = `<button onclick="document.getElementById('premium-modal').style.display='flex'" style="background:linear-gradient(135deg,#f7971e,#ffd200);border:none;color:#070710;padding:8px 16px;border-radius:10px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:0.82rem;margin-right:8px">⭐ Go Premium</button>
+    <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#00e5a0,#00c9b8);display:flex;align-items:center;justify-content:center;font-weight:800;color:#070710;font-size:0.85rem">${userName?userName[0].toUpperCase():'U'}</div>`;
+  }
+}
+
+function selectGoal(goal, el) {
+  document.querySelectorAll(".goal-opt").forEach(o => o.classList.remove("selected"));
+  el.classList.add("selected");
+  selectedGoal = goal;
+}
+
+function goStep2() {
+  userName = document.getElementById("user-name").value.trim();
+  if(!userName || !selectedGoal) { alert("Please enter your name and pick a goal! 😊"); return; }
+  document.getElementById("step1").style.display = "none";
+  document.getElementById("step2").style.display = "block";
+  document.getElementById("step-badge").textContent = "Step 2 of 2";
+  document.querySelector("#step2 h2").textContent = `Almost there, ${userName}! 🎉`;
+}
+
+function backStep1() {
+  document.getElementById("step1").style.display = "block";
+  document.getElementById("step2").style.display = "none";
+  document.getElementById("step-badge").textContent = "Step 1 of 2";
+}
+
+function finishOnboard() {
+  currentPartner = PARTNERS.find(p => p.goal === selectedGoal) || PARTNERS[0];
+  goTo("find");
+}
+
+function renderPartners(filter) {
+  if(filter) currentFilter = filter;
+  const grid = document.getElementById("partners-grid");
+  const list = currentFilter === "all" ? PARTNERS : PARTNERS.filter(p => p.goal === currentFilter);
+  grid.innerHTML = list.map(p => `
+    <div class="partner-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="av" style="background:${p.color};color:#fff">${p.av}${p.online?'<div class="online-dot"></div>':''}</div>
+          <div>
+            <div style="font-weight:700;font-size:0.98rem">${p.name}</div>
+            <div style="color:rgba(255,255,255,0.4);font-size:0.78rem">${p.flag} · ${p.online?'<span style="color:var(--green)">Online now</span>':'Offline'}</div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-weight:800;color:var(--green);font-size:1.3rem">${p.streak}</div>
+          <div style="color:rgba(255,255,255,0.3);font-size:0.7rem">day streak 🔥</div>
+        </div>
+      </div>
+      <div class="partner-bio">"${p.bio}"</div>
+      <div class="goal-tag">${GOALS[p.goal]}</div><br>
+      <button class="btn-green" onclick="partnerUp(${p.id})" style="width:100%;padding:11px;font-size:0.9rem">Partner Up →</button>
+    </div>
+  `).join("");
+  if(!userName) document.getElementById("join-cta").style.display = "block";
+}
+
+function filterPartners(filter, btn) {
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderPartners(filter);
+}
+
+function partnerUp(id) {
+  currentPartner = PARTNERS.find(p => p.id === id);
+  goTo("dashboard");
+}
+
+function updateDashboard() {
+  if(userName) document.getElementById("dash-greeting").textContent = `Hey ${userName} 👋`;
+  document.getElementById("partner-name").textContent = currentPartner.name;
+  document.getElementById("partner-loc").textContent = `${currentPartner.flag} · Online now`;
+  document.getElementById("partner-bio-text").textContent = `"${currentPartner.bio}"`;
+  document.getElementById("partner-streak").textContent = currentPartner.streak;
+  document.getElementById("partner-av").style.background = currentPartner.color;
+  document.getElementById("partner-av").innerHTML = currentPartner.av + '<div class="online-dot"></div>';
+  document.getElementById("msg-av").style.background = currentPartner.color;
+  document.getElementById("msg-av").innerHTML = currentPartner.av + '<div class="online-dot"></div>';
+  document.getElementById("msg-partner-name").textContent = currentPartner.name;
+  document.getElementById("checkin-btns").style.display = "block";
+  document.getElementById("checkin-done").style.display = "none";
+}
+
+function checkIn(val) {
+  document.getElementById("checkin-btns").style.display = "none";
+  const done = document.getElementById("checkin-done");
+  done.style.display = "block";
+  if(val === "yes") {
+    done.style.background = "rgba(0,229,160,0.08)";
+    done.style.border = "1px solid rgba(0,229,160,0.25)";
+    done.innerHTML = '<div style="font-size:2.2rem;margin-bottom:8px">🎉</div><div style="font-weight:700">Amazing! Partner notified. Keep that streak alive!</div>';
+  } else {
+    done.style.background = "rgba(255,100,100,0.08)";
+    done.style.border = "1px solid rgba(255,100,100,0.25)";
+    done.innerHTML = '<div style="font-size:2.2rem;margin-bottom:8px">💪</div><div style="font-weight:700">Tomorrow is a fresh start. You\'ve got this!</div>';
+  }
+}
+
+function sendMsg() {
+  const input = document.getElementById("msg-input");
+  const text = input.value.trim();
+  if(!text) return;
+  const list = document.getElementById("msg-list");
+  list.innerHTML += `<div style="display:flex;justify-content:flex-end"><div class="msg-bubble me">${text}<div class="msg-time">Now</div></div></div>`;
+  input.value = "";
+  list.scrollTop = list.scrollHeight;
+  setTimeout(() => {
+    list.innerHTML += `<div style="display:flex;justify-content:flex-start"><div class="msg-bubble them">That's the spirit! Keep going 💯<div class="msg-time">Now</div></div></div>`;
+    list.scrollTop = list.scrollHeight;
+  }, 1000);
+}
+
+function closePremium() {
+  document.getElementById("premium-modal").style.display = "none";
+}
+
+updateNav();
+renderPartners();
+</script>
+</body>
+</html>
